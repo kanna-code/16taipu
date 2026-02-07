@@ -12,6 +12,10 @@
   <meta property="og:image" content="https://kanna-code.github.io/16taipu/IMG_0858.png" />
   <meta name="twitter:card" content="summary_large_image" />
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -34,6 +38,16 @@
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       position: relative;
       overflow: hidden;
+      min-height: 400px; /* ロード画面での高さ確保 */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* 上詰めにするためのラッパー */
+    .content-wrapper {
+      width: 100%;
+      height: 100%;
     }
 
     .header {
@@ -125,7 +139,6 @@
       position: relative;
     }
 
-    /* サイズの変化をつける（同意度っぽく） */
     .option[data-value="1"] { transform: scale(0.8); }
     .option[data-value="2"] { transform: scale(0.9); }
     .option[data-value="3"] { transform: scale(1.0); }
@@ -189,6 +202,47 @@
       background: #ccc;
     }
 
+    /* ロード画面 */
+    .loader-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 0;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .loader-container.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #764ba2;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    .loading-text {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      animation: pulseText 1.5s infinite ease-in-out;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulseText {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
     /* 結果画面 */
     .result {
       display: none;
@@ -202,10 +256,10 @@
     }
 
     .result-header {
-        font-size: 20px;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 20px;
     }
 
     .result-type-ja {
@@ -222,14 +276,16 @@
     }
 
     .result-type-en {
-        font-family: 'Courier New', Courier, monospace; /* MBTIっぽい少し角ばったフォント */
-        font-size: 50px;
-        font-weight: 900;
-        letter-spacing: 4px;
-        color: #ee5a6f;
-        margin-bottom: 15px;
-        text-shadow: 0 2px 10px rgba(238, 90, 111, 0.2);
-        animation: pulse 2s ease-in-out infinite;
+      /* フォント変更: Oswaldを使用 */
+      font-family: 'Oswald', sans-serif;
+      font-size: 70px; /* 少し大きく */
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: #ee5a6f;
+      margin-bottom: 15px;
+      text-shadow: 0 2px 10px rgba(238, 90, 111, 0.2);
+      animation: pulse 2s ease-in-out infinite;
+      line-height: 1;
     }
 
     @keyframes pulse {
@@ -337,7 +393,8 @@
 </head>
 <body>
   <div class="container">
-    <div id="quiz">
+    
+    <div id="quiz" class="content-wrapper">
       <div class="header">
         <h1>16タイプ診断</h1>
         <p>性格・才能・適職を精密分析</p>
@@ -350,6 +407,11 @@
       <div id="questionsContainer"></div>
       
       <button class="btn" id="nextBtn" disabled>次へ</button>
+    </div>
+
+    <div id="loader" class="loader-container">
+      <div class="spinner"></div>
+      <p class="loading-text" id="loadingText">回答を分析中...</p>
     </div>
 
     <div class="result" id="resultScreen">
@@ -380,7 +442,6 @@
   </div>
 
   <script>
-    // 質問データ（診断への依存度をチェックする内容）
     const questions = [
       { text: 'MBTIなど16タイプ診断の結果を友達に話すことが多い' },
       { text: 'MBTI診断の結果で自分を説明することがある' },
@@ -394,7 +455,6 @@
       { text: '16タイプ診断の結果に一喜一憂する' }
     ];
 
-    // 結果タイプ（全て16タイプ診断への警告に統一）
     const results = [
       {
         code: 'WARNING',
@@ -481,13 +541,11 @@
     let currentQuestion = 0;
     let answers = [];
 
-    // 初期化
     function init() {
       renderQuestions();
       updateProgress();
     }
 
-    // 質問レンダリング
     function renderQuestions() {
       const container = document.getElementById('questionsContainer');
       container.innerHTML = '';
@@ -517,7 +575,6 @@
         container.appendChild(card);
       });
       
-      // オプション選択イベント
       document.querySelectorAll('.option').forEach(opt => {
         opt.addEventListener('click', (e) => {
             const qIndex = parseInt(e.target.dataset.qindex);
@@ -526,7 +583,6 @@
       });
     }
 
-    // オプション選択
     function selectOption(qIndex, element) {
       const card = document.querySelectorAll('.question-card')[qIndex];
       card.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
@@ -536,12 +592,10 @@
       document.getElementById('nextBtn').disabled = false;
     }
 
-    // 次の質問へ
     document.getElementById('nextBtn').addEventListener('click', () => {
       if (!answers[currentQuestion]) return;
       
       if (currentQuestion < questions.length - 1) {
-        // 次の質問へ
         const cards = document.querySelectorAll('.question-card');
         cards[currentQuestion].classList.remove('active');
         currentQuestion++;
@@ -550,22 +604,47 @@
         document.getElementById('nextBtn').disabled = true;
         updateProgress();
       } else {
-        // 診断完了
-        showResult();
+        // 診断完了 -> ロード画面へ
+        startLoading();
       }
     });
 
-    // プログレスバー更新
     function updateProgress() {
       const progress = ((currentQuestion) / questions.length) * 100;
       document.getElementById('progressBar').style.width = progress + '%';
     }
 
-    // 結果表示（ランダム選択）
+    // ロード演出
+    function startLoading() {
+      document.getElementById('quiz').style.display = 'none';
+      const loader = document.getElementById('loader');
+      loader.classList.add('active');
+      
+      const loadingText = document.getElementById('loadingText');
+      const messages = [
+        "回答を分析中...",
+        "精神構造パターンを照合中...",
+        "相性データベースにアクセス中...",
+        "16タイプを特定中...",
+        "完了"
+      ];
+      
+      let step = 0;
+      const interval = setInterval(() => {
+        step++;
+        if (step < messages.length) {
+          loadingText.textContent = messages[step];
+        } else {
+          clearInterval(interval);
+          loader.classList.remove('active');
+          showResult();
+        }
+      }, 800); // 0.8秒ごとにメッセージ切り替え（合計約4秒）
+    }
+
     function showResult() {
       const result = results[Math.floor(Math.random() * results.length)];
       
-      document.getElementById('quiz').style.display = 'none';
       document.getElementById('resultScreen').classList.add('active');
       
       document.getElementById('resultCode').textContent = result.code;
@@ -575,7 +654,6 @@
       document.getElementById('resultDesc').textContent = result.desc;
     }
 
-    // もう一度診断
     document.getElementById('retryBtn').addEventListener('click', () => {
       currentQuestion = 0;
       answers = [];
@@ -593,7 +671,6 @@
       updateProgress();
     });
 
-    // 初期化実行
     init();
   </script>
 
