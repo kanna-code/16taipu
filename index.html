@@ -3,7 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>16タイプ診断への警告</title>
+  <title>16タイプ診断</title>
+  
+  <meta property="og:title" content="精密16タイプ性格診断" />
+  <meta property="og:description" content="3分で完了。あなたの隠された性格・才能・適職を分析します。全16タイプからあなたの取扱説明書を作成。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://kanna-code.github.io/16taipu/" />
+  <meta property="og:image" content="https://kanna-code.github.io/16taipu/ogp.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -34,15 +42,16 @@
     }
 
     .header h1 {
-      font-size: 22px;
+      font-size: 24px;
       color: #333;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       font-weight: 800;
+      letter-spacing: 1px;
     }
 
     .header p {
       color: #666;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .progress-bar {
@@ -83,7 +92,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       margin: 0 auto 20px;
     }
@@ -312,8 +321,8 @@
   <div class="container">
     <div id="quiz">
       <div class="header">
-        <h1>16タイプ診断、本当に信じていい？</h1>
-        <p>流行ってるけど、ちょっと待って</p>
+        <h1>16タイプ診断</h1>
+        <p>性格・才能・適職を精密分析</p>
       </div>
 
       <div class="progress-bar">
@@ -488,7 +497,7 @@
         container.appendChild(card);
       });
       
-      // オプション選択イベントは生成後に一括付与（イベント委譲でも良いがシンプルに）
+      // オプション選択イベント
       document.querySelectorAll('.option').forEach(opt => {
         opt.addEventListener('click', (e) => {
             const qIndex = parseInt(e.target.dataset.qindex);
@@ -509,7 +518,6 @@
 
     // 次の質問へ
     document.getElementById('nextBtn').addEventListener('click', () => {
-      // 現在の質問に回答がない場合は進まない
       if (!answers[currentQuestion]) return;
       
       if (currentQuestion < questions.length - 1) {
@@ -519,10 +527,7 @@
         currentQuestion++;
         cards[currentQuestion].classList.add('active');
         
-        // 次の質問が既に回答済みかチェック（戻る機能はないが、リトライ時に影響）
-        // 今回の仕様ではリトライ時はanswersがリセットされるので、必ずdisabledにする
         document.getElementById('nextBtn').disabled = true;
-        
         updateProgress();
       } else {
         // 診断完了
@@ -532,7 +537,6 @@
 
     // プログレスバー更新
     function updateProgress() {
-      // 完了した数に基づいて進捗を表示
       const progress = ((currentQuestion) / questions.length) * 100;
       document.getElementById('progressBar').style.width = progress + '%';
     }
@@ -558,7 +562,6 @@
       document.getElementById('quiz').style.display = 'block';
       document.getElementById('resultScreen').classList.remove('active');
       
-      // 選択状態のリセット
       document.querySelectorAll('.question-card').forEach((card, i) => {
         card.classList.remove('active');
         if (i === 0) card.classList.add('active');
