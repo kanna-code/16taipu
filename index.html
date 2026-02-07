@@ -276,14 +276,21 @@
     }
 
     .result-type-en {
-      /* フォント変更: Oswaldを使用 */
       font-family: 'Oswald', sans-serif;
-      font-size: 70px; /* 少し大きく */
+      font-size: 80px;
       font-weight: 700;
       letter-spacing: 4px;
-      color: #ee5a6f;
+      color: #ff4757; /* 鮮やかな赤 */
       margin-bottom: 15px;
-      text-shadow: 0 2px 10px rgba(238, 90, 111, 0.2);
+      
+      /* 強力な縁取りと影をつける */
+      text-shadow: 
+        3px 3px 0 #2f3542,  /* 右下の太い影 */
+       -2px -2px 0 #2f3542, /* 左上の縁取り */
+        2px -2px 0 #2f3542, /* 右上の縁取り */
+       -2px 2px 0 #2f3542,  /* 左下の縁取り */
+        0 5px 15px rgba(0,0,0,0.3); /* 全体のぼかし影 */
+
       animation: pulse 2s ease-in-out infinite;
       line-height: 1;
     }
@@ -604,7 +611,6 @@
         document.getElementById('nextBtn').disabled = true;
         updateProgress();
       } else {
-        // 診断完了 -> ロード画面へ
         startLoading();
       }
     });
@@ -614,7 +620,6 @@
       document.getElementById('progressBar').style.width = progress + '%';
     }
 
-    // ロード演出
     function startLoading() {
       document.getElementById('quiz').style.display = 'none';
       const loader = document.getElementById('loader');
@@ -639,7 +644,7 @@
           loader.classList.remove('active');
           showResult();
         }
-      }, 800); // 0.8秒ごとにメッセージ切り替え（合計約4秒）
+      }, 800);
     }
 
     function showResult() {
